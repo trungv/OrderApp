@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OrderApp.Entities
+namespace OrderApp.Core
 {
     public class Class1
     {
