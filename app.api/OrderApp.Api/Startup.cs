@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OrderApp.Core.DatabaseContext;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -65,6 +66,10 @@ namespace OrderApp.Api
                     TermsOfService = "Terms Of Service"
                 });
             });
+
+            services.AddEntityFrameworkNpgsql()
+               .AddDbContext<OrderAppContext>()
+               .BuildServiceProvider();
         }
     }
 }
