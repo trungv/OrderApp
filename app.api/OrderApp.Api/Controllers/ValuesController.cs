@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using OrderApp.Api.Services;
 
 namespace OrderApp.Api.Controllers
 {
@@ -10,6 +11,11 @@ namespace OrderApp.Api.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly IOrderServices _orderServices;
+        public ValuesController(IOrderServices orderServices)
+        {
+            _orderServices = orderServices;
+        }
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
