@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OrderApp.Api.Services;
 using OrderApp.Core.DatabaseContext;
 using OrderApp.Core.Entities;
@@ -46,20 +39,11 @@ namespace OrderApp.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async Task ConfigureAsync(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
-                HttpRequestMessage httpRequest = new HttpRequestMessage();
-                HttpContent content;
-                using (var stream = new MemoryStream())
-                {
-                    await httpRequest.Content.CopyToAsync(stream);
-                    content = new StreamContent(stream);
-                }
-                httpRequest.Content.CopyToAsync(httpRequest2.Content);
                 app.UseDeveloperExceptionPage();
-                httpRequest.
             }
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
