@@ -55,7 +55,7 @@ namespace OrderApp.Api.Controllers
         [HttpGet("entity/{id}")]
         public ActionResult<string> GetEntity(int id)
         {
-            _orderServices.GetAll();
+
             return "avx";
         }
 

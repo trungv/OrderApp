@@ -1,4 +1,5 @@
 ﻿using System;
+using AutoMapper;
 using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderApp.Api.Consumers;
+using OrderApp.Api.MappingProfiles;
 using OrderApp.Api.MessageContract;
 using OrderApp.Api.Services;
 using OrderApp.Core.DatabaseContext;
@@ -33,6 +35,7 @@ namespace OrderApp.Api
         {
             RegisterSwagger(services);
             RegisterMassTransit(services);
+            RegisterAutoMapper(services);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             //services.AddDbContext<OrderAppContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
@@ -83,6 +86,18 @@ namespace OrderApp.Api
             services.AddEntityFrameworkNpgsql()
                .AddDbContext<OrderAppContext>()
                .BuildServiceProvider();
+        }
+
+        private void RegisterAutoMapper(IServiceCollection services)
+        {
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new OrderAppProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         private void RegisterMassTransit(IServiceCollection services)
