@@ -1,10 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using GreenPipes;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using OrderApp.Api.Consumers;
+using OrderApp.Api.MessageContract;
 using OrderApp.Api.Services;
 using OrderApp.Core.DatabaseContext;
 using OrderApp.Core.Entities;
@@ -27,6 +32,7 @@ namespace OrderApp.Api
         public void ConfigureServices(IServiceCollection services)
         {
             RegisterSwagger(services);
+            RegisterMassTransit(services);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             //services.AddDbContext<OrderAppContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
@@ -39,7 +45,7 @@ namespace OrderApp.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -77,6 +83,35 @@ namespace OrderApp.Api
             services.AddEntityFrameworkNpgsql()
                .AddDbContext<OrderAppContext>()
                .BuildServiceProvider();
+        }
+
+        private void RegisterMassTransit(IServiceCollection services)
+        {
+            services.AddScoped<SendEmailRequest>();
+            services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<IHostedService, BusService>();
+
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<SendEmailConsumer>();
+
+                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                {
+                    var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator =>
+                    {
+                        hostConfigurator.Username("guest");
+                        hostConfigurator.Password("guest");
+                    });
+
+                    cfg.ReceiveEndpoint(host, "submit-order", ep =>
+                    {
+                        ep.PrefetchCount = 16;
+                        ep.UseMessageRetry(r => r.Interval(2, 100));
+
+                        ep.ConfigureConsumer<SendEmailConsumer>(provider);
+                    });
+                }));
+            });
         }
     }
 }

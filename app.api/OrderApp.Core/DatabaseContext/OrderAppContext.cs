@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderApp.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OrderApp.Core.DatabaseContext
 {
@@ -10,7 +7,7 @@ namespace OrderApp.Core.DatabaseContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=192.168.1.56;Database=postgres;Username=postgres;Password=P@ssw0rd");
+            optionsBuilder.UseNpgsql("Host=localhost;Database=postgres;Username=postgres;Password=P@ssw0rd");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

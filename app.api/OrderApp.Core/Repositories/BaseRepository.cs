@@ -53,8 +53,6 @@ namespace OrderApp.Core.Repositories
             get { return _dbSet; }
         }
 
-        IQueryable<T> IBaseRepository<T>.GetAll => throw new NotImplementedException();
-
         public virtual T Update(T item)
         {
             var entry = _dataContext.Entry(item);

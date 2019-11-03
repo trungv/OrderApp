@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Hosting;
 
-namespace OrderApp.Messages.Services
+namespace OrderApp.Api.Services
 {
     public class BusService : IHostedService
     {

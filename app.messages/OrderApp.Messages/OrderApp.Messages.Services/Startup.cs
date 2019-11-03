@@ -28,13 +28,13 @@ namespace OrderApp.Messages.Services
         public void ConfigureServices(IServiceCollection services)
         {
             // Cấu hình cho MassTransit
-            //services.AddScoped<SendOrderConsumer>();
+            services.AddScoped<SendOrderConsumer>();
             services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             services.AddSingleton<IHostedService, BusService>();
 
             services.AddMassTransit(x =>
             {
-                //x.AddConsumer<SendOrderConsumer>();
+                x.AddConsumer<SendOrderConsumer>();
 
                 x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
@@ -49,7 +49,7 @@ namespace OrderApp.Messages.Services
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(r => r.Interval(2, 100));
 
-                        //ep.ConfigureConsumer<SendOrderConsumer>(provider);
+                        ep.ConfigureConsumer<SendOrderConsumer>(provider);
                     });
                 }));
             });

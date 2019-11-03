@@ -19,7 +19,7 @@ namespace OrderApp.Api.Services
         }
         public void GetAll()
         {
-            throw new NotImplementedException();
+            var x = _orderRepository.GetAll.ToList();
         }
     }
 }
