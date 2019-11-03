@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package OrderApp.Messages.EmailGrpcService;
+
+// The greeting service definition.
+service EmailService {
+  // Sends a greeting
+  rpc SendEmail (SendEmailRequest) returns (SendEmailReply);
+}
+
+// The request message containing the user's name.
+message SendEmailRequest {
+  string address = 1;
+}
+
+// The response message containing the greetings.
+message SendEmailReply {
+
+}

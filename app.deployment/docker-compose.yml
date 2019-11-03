@@ -19,3 +19,10 @@ services:
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
     ports:
       - 80:80
+      
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: always
+    ports:
+      - 15672:15672
+      - 5672:5672
