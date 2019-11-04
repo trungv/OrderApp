@@ -4,6 +4,7 @@ using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,15 +37,14 @@ namespace OrderApp.Api
             RegisterSwagger(services);
             RegisterMassTransit(services);
             RegisterAutoMapper(services);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            //services.AddDbContext<OrderAppContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+            //services.AddDbContext<OrderAppContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:PostgresConnection"]));
             services.AddDbContext<OrderAppContext>();
             services.AddScoped<DbContext, OrderAppContext>();
             services.AddScoped<IOrderServices, OrderServices>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
-            services.AddScoped<IDbFactory, DbFactory>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -112,10 +112,10 @@ namespace OrderApp.Api
 
                 x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator =>
+                    var host = cfg.Host(new Uri(Configuration["Rabbitmq:Url"]), hostConfigurator =>
                     {
-                        hostConfigurator.Username("guest");
-                        hostConfigurator.Password("guest");
+                        hostConfigurator.Username(Configuration["Rabbitmq:UserName"]);
+                        hostConfigurator.Password(Configuration["Rabbitmq:Password"]);
                     });
 
                     cfg.ReceiveEndpoint(host, "submit-order", ep =>
