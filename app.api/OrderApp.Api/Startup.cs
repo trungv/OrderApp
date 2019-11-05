@@ -37,13 +37,7 @@ namespace OrderApp.Api
             RegisterSwagger(services);
             RegisterMassTransit(services);
             RegisterAutoMapper(services);
-            //services.AddDbContext<OrderAppContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:PostgresConnection"]));
-            services.AddDbContext<OrderAppContext>();
-            services.AddScoped<DbContext, OrderAppContext>();
-            services.AddScoped<IOrderServices, OrderServices>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            RegisterEntityFrameworkNpgsql(services);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -69,6 +63,16 @@ namespace OrderApp.Api
             app.UseMvc();
         }
 
+        private void RegisterEntityFrameworkNpgsql(IServiceCollection services)
+        {
+            services.AddDbContext<OrderAppContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:PostgresConnection"]));
+            services.AddScoped<DbContext, OrderAppContext>();
+            services.AddScoped<IOrderServices, OrderServices>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
+            services.AddScoped<IDbFactory, DbFactory>();
+        }
+
         private void RegisterSwagger(IServiceCollection services)
         {
             services.AddSwaggerGen(options =>
@@ -82,10 +86,6 @@ namespace OrderApp.Api
                     TermsOfService = "Terms Of Service"
                 });
             });
-
-            services.AddEntityFrameworkNpgsql()
-               .AddDbContext<OrderAppContext>()
-               .BuildServiceProvider();
         }
 
         private void RegisterAutoMapper(IServiceCollection services)
