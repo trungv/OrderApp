@@ -100,8 +100,9 @@
     </div>
   </div>
 </template>
-<script>
 
+<script>
+import productService from "../services/product.service.js"
 export default {
   name: "PostManage",
   data () {
@@ -119,6 +120,11 @@ export default {
       console.log(this.newOrder);
       console.log(this.customer);
       console.log(this.products);
+      
+      productService.getAllProduct().then(data => {
+        this.posts = data
+        console.log(data)
+      })
     },
   },
   created(){
