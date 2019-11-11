@@ -4,6 +4,7 @@ using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,18 +34,21 @@ namespace OrderApp.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+
             RegisterSwagger(services);
             RegisterMassTransit(services);
             RegisterAutoMapper(services);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            RegisterEntityFrameworkNpgsql(services);
 
-            //services.AddDbContext<OrderAppContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
-            services.AddDbContext<OrderAppContext>();
-            services.AddScoped<DbContext, OrderAppContext>();
-            services.AddScoped<IOrderServices, OrderServices>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
-            services.AddScoped<IDbFactory, DbFactory>();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +58,8 @@ namespace OrderApp.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("CorsPolicy");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -69,6 +75,18 @@ namespace OrderApp.Api
             app.UseMvc();
         }
 
+        private void RegisterEntityFrameworkNpgsql(IServiceCollection services)
+        {
+            services.AddDbContext<OrderAppContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:PostgresConnection"]));
+            services.AddScoped<DbContext, OrderAppContext>();
+            services.AddScoped<IOrderServices, OrderServices>();
+            services.AddScoped<IProductServices, ProductServices>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
+            services.AddScoped<IBaseRepository<Product>, BaseRepository<Product>>();
+            services.AddScoped<IDbFactory, DbFactory>();
+        }
+
         private void RegisterSwagger(IServiceCollection services)
         {
             services.AddSwaggerGen(options =>
@@ -82,10 +100,6 @@ namespace OrderApp.Api
                     TermsOfService = "Terms Of Service"
                 });
             });
-
-            services.AddEntityFrameworkNpgsql()
-               .AddDbContext<OrderAppContext>()
-               .BuildServiceProvider();
         }
 
         private void RegisterAutoMapper(IServiceCollection services)
@@ -112,10 +126,10 @@ namespace OrderApp.Api
 
                 x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator =>
+                    var host = cfg.Host(new Uri(Configuration["Rabbitmq:Url"]), hostConfigurator =>
                     {
-                        hostConfigurator.Username("guest");
-                        hostConfigurator.Password("guest");
+                        hostConfigurator.Username(Configuration["Rabbitmq:UserName"]);
+                        hostConfigurator.Password(Configuration["Rabbitmq:Password"]);
                     });
 
                     cfg.ReceiveEndpoint(host, "submit-order", ep =>

@@ -1,7 +1,5 @@
-﻿using OrderApp.Core.DatabaseContext;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.EntityFrameworkCore;
+using OrderApp.Core.DatabaseContext;
 
 namespace OrderApp.Core.Repositories
 {
@@ -11,7 +9,7 @@ namespace OrderApp.Core.Repositories
 
         public OrderAppContext Init()
         {
-            return dbContext ?? (dbContext = new OrderAppContext());
+            return dbContext ?? (dbContext = new OrderAppContext(new DbContextOptions<OrderAppContext>()));
         }
 
         protected override void DisposeCore()
