@@ -68,8 +68,10 @@ namespace OrderApp.Api
             services.AddDbContext<OrderAppContext>(options => options.UseNpgsql(Configuration["ConnectionStrings:PostgresConnection"]));
             services.AddScoped<DbContext, OrderAppContext>();
             services.AddScoped<IOrderServices, OrderServices>();
+            services.AddScoped<IProductServices, ProductServices>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IBaseRepository<Order>, BaseRepository<Order>>();
+            services.AddScoped<IBaseRepository<Product>, BaseRepository<Product>>();
             services.AddScoped<IDbFactory, DbFactory>();
         }
 
