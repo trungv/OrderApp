@@ -21,6 +21,7 @@ namespace OrderApp.Messages.EmailGrpcService
                 {
                     var config = new ConfigurationBuilder()
                         .AddJsonFile("appsettings.json", optional: false)
+                        .AddEnvironmentVariables()
                         .Build();
 
                     var port = int.Parse(config.GetSection("GrpcServerPort").Value); // Can parse object if get some config
