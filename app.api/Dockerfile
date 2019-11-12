@@ -7,6 +7,7 @@ WORKDIR /src
 COPY *.sln .
 COPY ["OrderApp.Api/OrderApp.Api.csproj", "OrderApp.Api/"]
 COPY ["OrderApp.Core/OrderApp.Core.csproj", "OrderApp.Core/"]
+COPY ["OrderApp.Tests/OrderApp.Tests.csproj", "OrderApp.Tests/"]
 RUN dotnet restore
 COPY . .
 
