@@ -1,8 +1,55 @@
 # Use postgres/example user/password credentials
 version: '3.1'
-
+     
 services:
-
+  orderapp-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - Rabbitmq:Url=rabbitmq://rabbitmq:5672
+      - Rabbitmq:UserName=guest
+      - Rabbitmq:Password=guest
+      - ConnectionStrings:PostgresConnection=Host=postgres;Database=postgres;Username=postgres;Password=P@ssw0rd
+      - ServiceUrl:EmailGrpc=orderapp-email-grpc:5001
+    networks:
+      - backend
+    build:
+      context: ../app.api
+      dockerfile: Dockerfile
+    ports:
+      - "2001:80"
+    depends_on:
+      - postgres
+      - rabbitmq
+    restart: on-failure
+    
+  orderapp-identity:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    networks:
+      - backend
+    build:
+      context: ../app.identity/OrderApp.Identity
+      dockerfile: Dockerfile
+    ports:
+      - "2002:80"
+    restart: on-failure
+    
+  orderapp-email-grpc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - GrpcServerPort=4002
+    networks:
+      - backend
+    build:
+      context: ../app.messages/OrderApp.Messages
+      dockerfile: Dockerfile
+    ports:
+      - "2111:4002"
+    restart: on-failure
+    
   postgres:
     image: postgres
     restart: always
@@ -10,6 +57,8 @@ services:
       POSTGRES_PASSWORD: P@ssw0rd
     ports:
       - 5432:5432
+    networks:
+      - backend
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -18,7 +67,9 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
     ports:
-      - 80:80
+      - 8001:80
+    networks:
+      - backend
       
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -26,3 +77,9 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
+    networks:
+      - backend
+      
+networks:
+  backend:
+  frontend:

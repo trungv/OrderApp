@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OrderApp.Api.Services;
 using OrderApp.Messages.EmailGrpcService;
@@ -17,11 +18,13 @@ namespace OrderApp.Api.Controllers
         private readonly IOrderServices _orderServices;
         private readonly IBus _bus;
         private readonly ILogger<ValuesController> _logger;
-        public ValuesController(IOrderServices orderServices, IBus bus, ILogger<ValuesController> logger)
+        private readonly IConfiguration _configuration;
+        public ValuesController(IOrderServices orderServices, IBus bus, ILogger<ValuesController> logger, IConfiguration configuration)
         {
             _orderServices = orderServices;
             _bus = bus;
             _logger = logger;
+            _configuration = configuration;
         }
         // GET api/values
         [HttpGet]
@@ -41,7 +44,9 @@ namespace OrderApp.Api.Controllers
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
-            Channel channel = new Channel("127.0.0.1:5001", ChannelCredentials.Insecure);
+            var host = _configuration["ServiceUrl:EmailGrpc"];//127.0.0.1:5001
+
+            Channel channel = new Channel(host, ChannelCredentials.Insecure);
 
             var client = new EmailService.EmailServiceClient(channel);
 
