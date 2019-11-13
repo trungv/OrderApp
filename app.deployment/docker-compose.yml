@@ -67,7 +67,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: P@ssw0rd
     ports:
-      - 80:80
+      - 8001:80
     networks:
       - backend
       
